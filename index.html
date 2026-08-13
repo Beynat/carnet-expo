@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Carnets d'expo">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Carnets d'exposition</title>
+<style>
+  html,body{margin:0;padding:0;}
+  :root{
+    --wall:#15130f;
+    --panel:#201c17;
+    --panel-hi:#282219;
+    --paper:#ede6d3;
+    --dim:#a79c87;
+    --brass:#c6a244;
+    --brass-dim:#8f7433;
+    --oxide:#9a4b36;
+    --line:rgba(198,162,68,0.22);
+    --line-strong:rgba(198,162,68,0.45);
+    --serif:'Iowan Old Style','Palatino Linotype',Georgia,'Times New Roman',serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,'SF Mono','Cascadia Code','Roboto Mono',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{background:var(--wall);}
+  #app{
+    background:var(--wall);
+    color:var(--paper);
+    font-family:var(--sans);
+    min-height:100vh;
+    min-height:100dvh;
+    padding:0;
+    -webkit-font-smoothing:antialiased;
+    padding-top:env(safe-area-inset-top);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .shell{max-width:560px;margin:0 auto;padding:20px 18px 64px;}
+
+  .plaque{
+    display:flex;align-items:baseline;justify-content:space-between;
+    padding-bottom:14px;margin-bottom:18px;
+    border-bottom:1px solid var(--line-strong);
+  }
+  .plaque h1{
+    font-family:var(--serif);font-weight:400;font-size:22px;letter-spacing:0.04em;
+    margin:0;color:var(--paper);
+  }
+  .plaque .count{
+    font-family:var(--mono);font-size:11px;letter-spacing:0.08em;color:var(--dim);
+    text-transform:uppercase;
+  }
+
+  .search{
+    display:flex;align-items:center;gap:8px;
+    background:var(--panel);border:1px solid var(--line);border-radius:2px;
+    padding:10px 12px;margin-bottom:16px;
+  }
+  .search input{
+    background:none;border:none;outline:none;color:var(--paper);
+    font-family:var(--sans);font-size:16px;width:100%;
+  }
+  .search input::placeholder{color:var(--dim);}
+  .search svg{flex-shrink:0;opacity:0.6;}
+
+  .card{
+    position:relative;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-left:2px solid var(--oxide);
+    border-radius:2px;
+    padding:14px 16px 14px 18px;
+    margin-bottom:10px;
+    cursor:pointer;
+  }
+  .card:active{background:var(--panel-hi);transform:scale(0.99);}
+  .card .num{
+    font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--brass);
+    display:block;margin-bottom:6px;text-transform:uppercase;
+  }
+  .card .artist{
+    font-family:var(--serif);font-size:19px;color:var(--paper);margin:0 0 2px;
+  }
+  .card .expo{
+    font-family:var(--sans);font-size:13px;color:var(--dim);font-style:italic;margin:0 0 8px;
+  }
+  .card .meta{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.05em;color:var(--brass-dim);
+    text-transform:uppercase;
+  }
+
+  .empty{
+    text-align:center;padding:56px 20px;color:var(--dim);
+  }
+  .empty .glyph{font-size:28px;margin-bottom:12px;opacity:0.5;}
+  .empty p{font-size:14px;line-height:1.6;margin:0 0 18px;}
+
+  .back{
+    display:flex;align-items:center;gap:6px;background:none;border:none;
+    color:var(--dim);font-family:var(--mono);font-size:11px;letter-spacing:0.08em;
+    text-transform:uppercase;cursor:pointer;padding:6px 0;margin-bottom:16px;
+  }
+
+  .label-block{
+    border:1px solid var(--line-strong);padding:16px 16px 18px;border-radius:2px;
+    margin-bottom:18px;background:var(--panel);
+  }
+  .label-block .num{
+    font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--brass);
+    text-transform:uppercase;display:block;margin-bottom:10px;
+  }
+  .label-block h2{
+    font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.15;
+    margin:0 0 3px;color:var(--paper);
+  }
+  .label-block .expo-title{
+    font-family:var(--sans);font-style:italic;font-size:15px;color:var(--dim);margin:0 0 14px;
+  }
+  .dotline{
+    display:flex;align-items:baseline;gap:6px;font-size:12.5px;margin:5px 0;
+  }
+  .dotline .k{
+    font-family:var(--mono);color:var(--brass-dim);text-transform:uppercase;letter-spacing:0.05em;
+    white-space:nowrap;flex-shrink:0;
+  }
+  .dotline .fill{
+    flex:1;border-bottom:1px dotted var(--line-strong);margin-bottom:3px;min-width:8px;
+  }
+  .dotline .v{color:var(--paper);text-align:right;flex-shrink:0;max-width:65%;}
+
+  .essential{
+    background:var(--panel-hi);border-left:2px solid var(--brass);
+    padding:14px 16px;margin-bottom:20px;border-radius:2px;
+  }
+  .essential .eyebrow{
+    font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--brass);
+    text-transform:uppercase;display:block;margin-bottom:8px;
+  }
+  .essential p{margin:0;font-size:14.5px;line-height:1.65;color:var(--paper);}
+
+  details.section{
+    border-bottom:1px solid var(--line);
+  }
+  details.section summary{
+    list-style:none;cursor:pointer;padding:14px 2px;
+    display:flex;align-items:center;gap:12px;
+  }
+  details.section summary::-webkit-details-marker{display:none;}
+  details.section summary .idx{
+    font-family:var(--mono);font-size:11px;color:var(--brass);flex-shrink:0;width:20px;
+  }
+  details.section summary .title{
+    font-family:var(--serif);font-size:16.5px;color:var(--paper);flex:1;
+  }
+  details.section summary .chev{
+    font-family:var(--mono);color:var(--dim);font-size:12px;transition:transform .15s ease;
+  }
+  details.section[open] summary .chev{transform:rotate(90deg);}
+  .section-body{padding:0 2px 18px 32px;}
+  .section-body p{font-size:14px;line-height:1.7;color:var(--paper);margin:0 0 12px;}
+  .section-body p:last-child{margin-bottom:0;}
+  .section-body ul{margin:0 0 12px;padding-left:18px;}
+  .section-body li{font-size:14px;line-height:1.6;color:var(--paper);margin-bottom:4px;}
+
+  .vocab-item{margin-bottom:12px;}
+  .vocab-item .term{
+    font-family:var(--serif);font-style:italic;color:var(--brass);font-size:14.5px;
+  }
+  .vocab-item .def{font-size:13.5px;color:var(--dim);line-height:1.55;margin-top:2px;}
+
+  .source-item a{
+    color:var(--paper);font-size:13.5px;text-decoration:none;border-bottom:1px dotted var(--line-strong);
+  }
+
+  .footnote{
+    text-align:center;font-family:var(--mono);font-size:10px;color:var(--dim);
+    margin-top:28px;letter-spacing:0.05em;
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function(){
+  // ===== NOTES:START =====
+  // Généré/mis à jour automatiquement par le skill "preparation-visite-expo".
+  // Ne pas éditer les délimiteurs NOTES:START / NOTES:END.
+  const NOTES = [
+    {
+      "id": "nan-goldin-grand-palais-2026",
+      "artist": "Nan Goldin",
+      "expoTitle": "This Will Not End Well",
+      "venue": "Grand Palais, Paris — volet Sisters, Saints, Sibyls à la chapelle Saint-Louis de la Salpêtrière",
+      "expoDates": "18 mars – 21 juin 2026",
+      "visitDate": "",
+      "essential": "Nan Goldin est la photographe de l'intime absolu : depuis la fin des années 1970, elle documente sa vie et celle de ses proches — amours, nuits, drogue, deuil, résilience — sans filtre esthétisant. Cette rétrospective est la première grande présentation de ses films et diaporamas au Grand Palais, et la première fois que son travail est montré ainsi en France. À ne pas rater : The Ballad of Sexual Dependency, son œuvre fondatrice, et le pavillon Sisters, Saints, Sibyls à la Salpêtrière, conçu spécifiquement pour ce lieu en 2004.",
+      "biography": "Née le 12 septembre 1953 à Washington D.C., dans une famille juive ashkénaze de la petite classe moyenne, Nancy Goldin — dite Nan — grandit dans le Massachusetts, cadette de quatre enfants.\n\nÀ 11 ans, sa sœur aînée Barbara se suicide après plusieurs séjours en hôpital psychiatrique, internée car jugée trop rebelle par leurs parents. Ces derniers se murent dans le silence et tentent de lui cacher la vérité. Cette perte et ce silence familial irriguent toute son œuvre à venir, centrée sur la mémoire et la nécessité de garder trace de ceux qu'elle aime.\n\nElle fuit le foyer familial vers 13-14 ans, vit un temps en communauté, puis s'inscrit à la Satya Community School de Boston (la \"Hippie Free School\"), lycée expérimental libre où un professeur l'initie à la photographie — elle a alors 15 ans. C'est là qu'elle découvre une communauté de drag queens, expérience déterminante pour son œuvre future.\n\nFormation : licence en arts plastiques, puis en 1972 école de musique à Boston où elle rencontre le photographe David Armstrong (futur drag queen, ami et sujet récurrent toute sa vie), avant d'intégrer la School of the Museum of Fine Arts de Boston.\n\nEn 1978, court séjour à Londres où elle s'immerge dans la culture punk naissante (Sex Pistols, Clash, Jam), puis installation à New York, dans un loft du Bowery, où elle retrouve ses amis de Boston — David Armstrong, Sharon Niesp, Cookie Mueller. Une \"famille choisie\" se construit autour d'elle, dans une atmosphère de sexualité libre et de consommation de drogues. Elle travaille comme serveuse pour vivre — la photographie n'est encore qu'un geste d'intimité envers ses proches.\n\nElle traverse et documente de l'intérieur la scène underground new-yorkaise (Bowery, Times Square, Mudd Club), la crise du sida qui emporte nombre de ses amis (dont Cookie Mueller, morte en 1989), le mouvement gay et lesbien, la violence conjugale. Plus tard, en 2014, une opération du poignet lui vaut une prescription d'OxyContin dont elle devient dépendante ; en 2017, après avoir frôlé la mort, elle entame une cure de désintoxication et commence son combat public contre les Sackler et Purdue Pharma.\n\nRéférences citées par l'artiste : Andy Warhol, Larry Clark, Diane Arbus, Weegee, August Sander, ainsi que les pages des magazines Vogue français et italien.\n\nReconnaissance institutionnelle : Légion d'honneur française (2006), Hasselblad Foundation International Award (2007), Lucie Award (2014).\n\nVie privée : Nan Goldin ne s'est jamais mariée et n'a pas d'enfant. Elle se déclare, dès 1996 dans une interview à The Advocate, activement bisexuelle depuis le début de sa vie sexuelle, et cite l'influence de la communauté LGBTQ qui l'entoure depuis l'adolescence. Sa relation la plus marquante et la plus photographiée reste celle avec Brian — relation passionnelle et violente qui donne naissance à son autoportrait le plus célèbre, Nan un mois après avoir été battue (1984), pris après avoir été frappée par lui.\n\nChez elle, la notion de famille se déplace : plutôt qu'une cellule conjugale classique, elle parle de \"famille choisie\" — ses amis, ses amants, sa communauté. À partir des années 2000, son travail s'ouvre davantage aux thèmes de la famille, des enfants et de l'amour, dans des séries réalisées en Europe, notamment en France — en tant que sujets photographiés, pas en tant que vécu personnel de parentalité.",
+      "artwork": "Goldin est connue pour avoir transformé le journal intime visuel en forme artistique majeure : elle photographie sa vie et celle de ses proches sans mise en scène, comme on tiendrait un journal. Ses photos prises sur le vif documentent une époque entière — drogue, prostitution, mouvement gay et lesbien, violence conjugale, crise du sida.\n\nÉvolution technique : ses premières photos sont en noir et blanc, en lumière d'ambiance. Au tournant des années 1970 elle passe à la couleur, avec parfois recours au flash pour des rendus plus contrastés, tirant parfois ses diapositives sur support Cibachrome — mais son dispositif de prédilection reste la diapositive projetée entre amis, pratique répandue à l'époque dans la sphère privée et familiale, qu'elle érige en forme artistique. Installée à New York, elle développe des couleurs saturées et une lumière artificielle marquée.\n\nSa \"patte\" : flash cru, teintes vives, cadrage instantané, sujets pris dans l'intimité (lits, salles de bain, fêtes), absence totale de distance entre elle et ses modèles — amis, amants, elle-même.\n\nŒuvre qui installe sa réputation : The Ballad of Sexual Dependency, série continue d'instantanés austères éclairés au flash documentant ses expériences avec la scène LGBTQ+, en particulier pendant l'épidémie de sida — exposée pour la première fois à la Biennale du Whitney en 1985, avant diffusion en clubs et publication en livre.\n\nMode de présentation : contrairement à une photographe \"classique\", elle privilégie longtemps la projection collective au tirage, diffusant son travail dans des lieux underground, en performances dans des cinémas ou des boîtes de nuit — choix artistique encore central dans l'exposition du Grand Palais (pavillons-projections plutôt qu'accrochage de tirages).\n\nDepuis 2017, son travail et son activisme se rejoignent directement : le collectif P.A.I.N. mène des actions performatives dans les musées mêmes qui exposent son œuvre, comme jeter des flacons d'opioïdes vides dans le bassin du Metropolitan Museum de New York — brouillant la frontière entre œuvre, discours et action militante.",
+      "reception": "Haut fait : son activisme contre les Sackler a directement contribué à faire retirer leur nom de plusieurs grandes institutions culturelles (Met, Louvre, Tate...) — un cas rare d'artiste ayant un impact institutionnel concret via son travail militant.\n\nPolémiques : les avis sur l'exposition au Grand Palais sont contrastés. Certains visiteurs saluent l'émotion des diaporamas sonores ; d'autres critiquent une scénographie jugée mal pensée (queues, salles bondées, accès bloqué pendant les diffusions) et un sujet perçu par certains comme trash ou sans intérêt artistique. Plus largement, son œuvre a pu être critiquée pour son exposition très frontale de sujets difficiles — addiction, violence conjugale, dont elle-même a été victime.",
+      "focus": "This Will Not End Well ne présente pas des tirages isolés mais six œuvres emblématiques déployées dans une scénographie conçue par l'architecte Hala Wardé, sous forme de pavillons formant un village, chacun pensé pour accueillir une œuvre spécifique — un parcours immersif plutôt qu'un accrochage classique.\n\nŒuvres présentes : The Ballad of Sexual Dependency ; un second diaporama numérique de 24'26'' retraçant une vie sous le prisme de la dépendance aux drogues, mêlant images d'archives, interviews et enregistrements de répondeurs des années 1980 ; ainsi que Sisters, Saints, Sibyls, présentée à part, à la chapelle de la Salpêtrière, lieu pour lequel elle a été conçue en 2004.\n\nContemporains associés à cette période et cette scène : Larry Clark, David Armstrong (proche collaborateur et modèle récurrent), Cookie Mueller (figure de la scène new-yorkaise photographiée par Goldin) — utile pour resituer le milieu qu'elle documentait.",
+      "vocabulary": [
+        {
+          "term": "Diaporama (slide show)",
+          "def": "Ici, forme d'œuvre à part entière chez Goldin — succession de diapositives projetées, montée avec une bande-son, pas un simple outil de présentation."
+        },
+        {
+          "term": "Snapshot aesthetic",
+          "def": "Esthétique de l'instantané, photo prise sur le vif sans mise en scène préparée, comme une photo de famille — Goldin l'élève au rang artistique."
+        },
+        {
+          "term": "Photographie confessionnelle",
+          "def": "Courant où l'artiste documente sa propre vie intime comme matière première de l'œuvre."
+        }
+      ],
+      "sources": [
+        {
+          "label": "grandpalais.fr — pages officielles de l'exposition",
+          "url": "https://www.grandpalais.fr/fr/programme/nan-goldin-will-not-end-well"
+        },
+        {
+          "label": "offi.fr — avis visiteurs",
+          "url": "https://www.offi.fr/expositions-musees/grand-palais-salon-dhonneur-5400/nan-goldin-this-will-not-end-well-104816.html"
+        }
+      ]
+    }
+  ];
+  // ===== NOTES:END =====
+
+  const app = document.getElementById('app');
+  let state = { view:'list', notes: NOTES.slice().sort((a,b)=>(a.artist||'').localeCompare(b.artist||'','fr')), activeId:null, query:'' };
+
+  function richText(text){
+    if(!text) return '';
+    const blocks = String(text).split(/\n\n+/);
+    return blocks.map(b=>{
+      const lines = b.split('\n').filter(l=>l.trim().length);
+      const isList = lines.length>0 && lines.every(l=>l.trim().startsWith('- '));
+      if(isList){
+        return '<ul>'+lines.map(l=>'<li>'+escapeHtml(l.trim().slice(2))+'</li>').join('')+'</ul>';
+      }
+      return '<p>'+escapeHtml(b.trim()).replace(/\n/g,'<br>')+'</p>';
+    }).join('');
+  }
+
+  function escapeHtml(s){
+    const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+  }
+
+  function iconSearch(){
+    return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
+  }
+
+  function renderList(){
+    const q = state.query.trim().toLowerCase();
+    const notes = state.notes.filter(n=>{
+      if(!q) return true;
+      return (n.artist||'').toLowerCase().includes(q) || (n.expoTitle||'').toLowerCase().includes(q) || (n.venue||'').toLowerCase().includes(q);
+    });
+
+    let cardsHtml = '';
+    if(notes.length === 0 && !q){
+      cardsHtml = '<div class="empty"><div class="glyph">◇</div><p>Aucune fiche pour l\'instant.</p></div>';
+    } else if(notes.length === 0){
+      cardsHtml = '<div class="empty"><p>Aucune fiche ne correspond à « '+escapeHtml(state.query)+' ».</p></div>';
+    } else {
+      cardsHtml = notes.map((n,i)=>{
+        const num = String(i+1).padStart(3,'0');
+        return '<div class="card" data-open="'+n.id+'">'
+          +'<span class="num">N° '+num+'</span>'
+          +'<p class="artist">'+escapeHtml(n.artist)+'</p>'
+          +'<p class="expo">'+escapeHtml(n.expoTitle||'')+'</p>'
+          +'<span class="meta">'+escapeHtml(n.venue||'')+(n.expoDates ? ' · '+escapeHtml(n.expoDates) : '')+'</span>'
+          +'</div>';
+      }).join('');
+    }
+
+    return '<div class="shell">'
+      +'<div class="plaque"><h1>Carnets d\'exposition</h1><span class="count">'+state.notes.length+' fiche'+(state.notes.length>1?'s':'')+'</span></div>'
+      +'<div class="search">'+iconSearch()+'<input id="search-input" type="text" placeholder="Chercher un artiste, une exposition…" value="'+escapeHtml(state.query)+'"></div>'
+      +cardsHtml
+      +'<div class="footnote">Copie mobile en lecture seule — mise à jour depuis Cowork</div>'
+      +'</div>';
+  }
+
+  function renderDetail(){
+    const n = state.notes.find(x=>x.id===state.activeId);
+    if(!n) return renderList();
+
+    const sections = [
+      {title:'Biographie synthétique', body:n.biography},
+      {title:"Spécificités de l'œuvre", body:n.artwork},
+      {title:'Critiques, polémiques, hauts faits', body:n.reception},
+      {title:"Focus sur l'exposition", body:n.focus}
+    ];
+
+    let sectionsHtml = sections.map((s,i)=>{
+      return '<details class="section"><summary><span class="idx">'+String(i+2).padStart(2,'0')+'</span><span class="title">'+escapeHtml(s.title)+'</span><span class="chev">›</span></summary>'
+        +'<div class="section-body">'+richText(s.body)+'</div></details>';
+    }).join('');
+
+    if(n.vocabulary && n.vocabulary.length){
+      const vocabHtml = n.vocabulary.map(v=>'<div class="vocab-item"><span class="term">'+escapeHtml(v.term)+'</span><div class="def">'+escapeHtml(v.def)+'</div></div>').join('');
+      sectionsHtml += '<details class="section"><summary><span class="idx">06</span><span class="title">Repères de vocabulaire</span><span class="chev">›</span></summary><div class="section-body">'+vocabHtml+'</div></details>';
+    }
+    if(n.sources && n.sources.length){
+      const srcHtml = n.sources.map(s=>'<div class="source-item">'+(s.url ? '<a href="'+escapeHtml(s.url)+'" target="_blank" rel="noopener">'+escapeHtml(s.label)+'</a>' : escapeHtml(s.label))+'</div>').join('');
+      sectionsHtml += '<details class="section"><summary><span class="idx">07</span><span class="title">Sources</span><span class="chev">›</span></summary><div class="section-body">'+srcHtml+'</div></details>';
+    }
+
+    return '<div class="shell">'
+      +'<button class="back" data-nav="list">‹ Bibliothèque</button>'
+      +'<div class="label-block">'
+        +'<span class="num">Fiche d\'exposition</span>'
+        +'<h2>'+escapeHtml(n.artist)+'</h2>'
+        +'<p class="expo-title">'+escapeHtml(n.expoTitle||'')+'</p>'
+        +'<div class="dotline"><span class="k">Lieu</span><span class="fill"></span><span class="v">'+escapeHtml(n.venue||'—')+'</span></div>'
+        +'<div class="dotline"><span class="k">Dates expo</span><span class="fill"></span><span class="v">'+escapeHtml(n.expoDates||'—')+'</span></div>'
+        +'<div class="dotline"><span class="k">Visite</span><span class="fill"></span><span class="v">'+escapeHtml(n.visitDate||'à définir')+'</span></div>'
+      +'</div>'
+      +'<div class="essential"><span class="eyebrow">01 — Essentiel</span><p>'+escapeHtml(n.essential||'')+'</p></div>'
+      +sectionsHtml
+      +'</div>';
+  }
+
+  function render(){
+    let html = state.view === 'detail' ? renderDetail() : renderList();
+    app.innerHTML = html;
+    bindEvents();
+  }
+
+  function bindEvents(){
+    app.querySelectorAll('[data-open]').forEach(el=>{
+      el.addEventListener('click', ()=>{ state.activeId = el.getAttribute('data-open'); state.view='detail'; window.scrollTo(0,0); render(); });
+    });
+    app.querySelectorAll('[data-nav]').forEach(el=>{
+      el.addEventListener('click', ()=>{ state.view = el.getAttribute('data-nav'); window.scrollTo(0,0); render(); });
+    });
+    const searchInput = app.querySelector('#search-input');
+    if(searchInput){
+      searchInput.addEventListener('input', (e)=>{ state.query = e.target.value; render(); setTimeout(()=>{ const el = app.querySelector('#search-input'); if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); } },0); });
+    }
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
