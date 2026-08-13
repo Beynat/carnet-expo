@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Carnets d'expo">
 <meta name="mobile-web-app-capable" content="yes">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Carnets d'exposition</title>
 <style>
   html,body{margin:0;padding:0;}
@@ -395,6 +398,19 @@
   }
 
   render();
+
+  // Rouvrir l'app depuis l'écran d'accueil réactive une page mise en veille par iOS
+  // plutôt que de la recharger : on force un rechargement réseau à chaque retour
+  // au premier plan pour éviter d'afficher une copie figée.
+  var __loadedAt = Date.now();
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible' && Date.now() - __loadedAt > 2000){
+      location.reload();
+    }
+  });
+  window.addEventListener('pageshow', function(e){
+    if(e.persisted) location.reload();
+  });
 })();
 </script>
 </body>
