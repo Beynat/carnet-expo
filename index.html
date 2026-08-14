@@ -178,6 +178,25 @@
     color:var(--paper);font-size:13.5px;text-decoration:none;border-bottom:1px dotted var(--line-strong);
   }
 
+  /* galerie d'œuvres */
+  .artwork{margin-bottom:22px;}
+  .artwork:last-child{margin-bottom:4px;}
+  .artwork img{
+    display:block;width:100%;height:auto;border-radius:2px;
+    border:1px solid var(--line);background:var(--panel-hi);
+  }
+  .artwork .cap{margin-top:7px;}
+  .artwork .cap .t{
+    font-family:var(--serif);font-style:italic;font-size:14.5px;color:var(--paper);
+  }
+  .artwork .cap .y{
+    font-family:var(--mono);font-size:11px;color:var(--brass);margin-left:6px;
+  }
+  .artwork .cap .c{
+    display:block;font-family:var(--mono);font-size:10px;color:var(--dim);
+    margin-top:3px;line-height:1.45;
+  }
+
   .footnote{
     text-align:center;font-family:var(--mono);font-size:10px;color:var(--dim);
     margin-top:28px;letter-spacing:0.05em;
@@ -293,6 +312,17 @@
     if(n.sources && n.sources.length){
       const srcHtml = n.sources.map(s=>'<div class="source-item">'+(s.url ? '<a href="'+escapeHtml(s.url)+'" target="_blank" rel="noopener">'+escapeHtml(s.label)+'</a>' : escapeHtml(s.label))+'</div>').join('');
       sectionsHtml += '<details class="section"><summary><span class="idx">07</span><span class="title">Sources</span><span class="chev">›</span></summary><div class="section-body">'+srcHtml+'</div></details>';
+    }
+    if(n.artworks && n.artworks.length){
+      const artHtml = n.artworks.map(a=>{
+        const year = a.year ? '<span class="y">'+escapeHtml(a.year)+'</span>' : '';
+        const credit = a.credit ? '<span class="c">'+escapeHtml(a.credit)+'</span>' : '';
+        return '<figure class="artwork">'
+          +'<img src="'+escapeHtml(a.file)+'" alt="'+escapeHtml(a.title||'')+'" loading="lazy">'
+          +'<figcaption class="cap"><span class="t">'+escapeHtml(a.title||'Sans titre')+'</span>'+year+credit+'</figcaption>'
+          +'</figure>';
+      }).join('');
+      sectionsHtml += '<details class="section"><summary><span class="idx">08</span><span class="title">Œuvres vues</span><span class="chev">›</span></summary><div class="section-body">'+artHtml+'</div></details>';
     }
 
     return '<div class="shell">'
