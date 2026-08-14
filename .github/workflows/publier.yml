@@ -36,6 +36,56 @@ jobs:
           python3 -m json.tool data/fiches.json > /dev/null
           echo "JSON valide — $(python3 -c "import json;print(len(json.load(open('data/fiches.json'))))") fiche(s)"
 
+      # Une image non redimensionnée resterait dans l'historique Git pour toujours
+      # et alourdirait chaque clone, donc chaque session cloud. 400 Ko = 3× la taille
+      # d'une vignette normale : aucun faux positif, mais un original est arrêté net.
+      - name: Vérifier le poids des images
+        run: |
+          limite=409600
+          trop_lourdes=$(find images -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -size +${limite}c 2>/dev/null || true)
+          if [ -n "$trop_lourdes" ]; then
+            echo "::error::Images dépassant 400 Ko — à redimensionner à 800 px de large avant publication :"
+            echo "$trop_lourdes" | while read -r f; do
+              echo "  $f — $(du -h "$f" | cut -f1)"
+            done
+            exit 1
+          fi
+          total=$(du -sh images 2>/dev/null | cut -f1 || echo "0")
+          nb=$(find images -type f 2>/dev/null | wc -l)
+          echo "$nb image(s), $total au total — aucune au-dessus de 400 Ko"
+
+      # On vérifie le format réel du fichier, pas sa taille : une œuvre en aplats
+      # de couleur (gouache découpée, monochrome) compresse à quelques kilo-octets
+      # tout en étant parfaitement valide. Ce qu'on veut attraper, c'est une page
+      # d'erreur HTML enregistrée sous un nom en .jpg.
+      - name: Vérifier que chaque image référencée existe et est bien une image
+        run: |
+          python3 - <<'PY'
+          import json, os, sys, subprocess
+          fiches = json.load(open('data/fiches.json', encoding='utf-8'))
+          manquantes, pas_des_images = [], []
+          for f in fiches:
+              for a in f.get('artworks', []):
+                  chemin = a.get('file', '')
+                  if not os.path.isfile(chemin):
+                      manquantes.append(f"{f['id']} → {chemin}")
+                      continue
+                  type_reel = subprocess.run(['file', '-b', '--mime-type', chemin],
+                                             capture_output=True, text=True).stdout.strip()
+                  if not type_reel.startswith('image/'):
+                      pas_des_images.append(f"{f['id']} → {chemin} (détecté : {type_reel})")
+          if manquantes:
+              print("::error::Images référencées dans fiches.json mais absentes du dépôt :")
+              for m in manquantes: print("  " + m)
+          if pas_des_images:
+              print("::error::Fichiers qui ne sont pas des images — page d'erreur enregistrée en .jpg ?")
+              for p in pas_des_images: print("  " + p)
+          if manquantes or pas_des_images:
+              sys.exit(1)
+          total = sum(len(f.get('artworks', [])) for f in fiches)
+          print(f"{total} image(s) référencée(s), toutes présentes et valides")
+          PY
+
       - name: Reporter sur main si le commit vient d'une autre branche
         if: github.ref_name != 'main'
         run: |
