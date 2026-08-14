@@ -299,6 +299,26 @@
         "label": "The Times of Israel — Le séjour de Matisse en France de Vichy : collaboration ou résistance discrète ?",
         "url": "https://fr.timesofisrael.com/le-sejour-dhenri-matisse-dans-la-france-de-vichy-collaboration-ou-discrete-resistance/"
       }
+    ],
+    "artworks": [
+      {
+        "file": "images/henri-matisse-grand-palais-2026/01.jpg",
+        "title": "La Tristesse du roi",
+        "year": "1952",
+        "credit": "Wikimedia Commons, domaine public — Centre Pompidou, Paris"
+      },
+      {
+        "file": "images/henri-matisse-grand-palais-2026/02.jpg",
+        "title": "Zulma",
+        "year": "1950",
+        "credit": "SMK Open (Statens Museum for Kunst, Copenhague), domaine public"
+      },
+      {
+        "file": "images/henri-matisse-grand-palais-2026/03.jpg",
+        "title": "Nu bleu IV",
+        "year": "1952",
+        "credit": "Wikimedia Commons, domaine public — Musée Matisse, Nice"
+      }
     ]
   }
 ]
