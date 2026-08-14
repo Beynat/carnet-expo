@@ -12,6 +12,7 @@ synchroniser ailleurs.
 ```
 index.html            Affichage seul (HTML/CSS/JS autonome). Charge data/fiches.json via fetch.
 data/fiches.json      Toutes les fiches. C'est le seul fichier à modifier pour ajouter du contenu.
+images/<id-fiche>/    Les photos d'œuvres de la fiche, une par œuvre (01.jpg, 02.jpg…).
 .claude/skills/       Le skill preparation-visite-expo, qui décrit comment produire une fiche.
 ```
 
@@ -37,7 +38,15 @@ demande explicite portant sur l'apparence ou le fonctionnement de la page.
   "reception": "Critiques, polémiques et hauts faits — au sujet de l'ARTISTE, pas de l'exposition",
   "focus": "Focus sur l'exposition, y compris sa réception critique",
   "vocabulary": [{ "term": "Terme", "def": "Définition" }],
-  "sources": [{ "label": "Nom de la source", "url": "https://..." }]
+  "sources": [{ "label": "Nom de la source", "url": "https://..." }],
+  "artworks": [
+    {
+      "file": "images/id-de-la-fiche/01.jpg",
+      "title": "Titre de l'œuvre",
+      "year": "1947",
+      "credit": "Source de l'image, et détenteur des droits si connu"
+    }
+  ]
 }
 ```
 
@@ -52,6 +61,28 @@ Contraintes de contenu :
   `\n\n` et n'utilisent pas de listes à puces, sauf si le contenu s'y prête vraiment (dans ce cas,
   lignes commençant par `- `).
 - Pas de doublon d'`id` : ajouter une fiche dont l'`id` existe déjà signifie remplacer l'existante.
+- `artworks` contient 5 entrées quand c'est possible, moins si on ne trouve pas d'images fiables. Le champ peut être absent : l'affichage le gère.
+
+## Images d'œuvres
+
+Objectif : garder une trace visuelle de ce qui a été vu. Les images sont **copiées dans le repo**, jamais liées à un site externe — un lien cassé dans deux ans ferait perdre le souvenir.
+
+Règles de collecte, toutes obligatoires :
+
+- **Des œuvres nommément attestées comme exposées**, par le dossier de presse du musée, la page officielle détaillant le parcours, ou un compte rendu de presse citant l'œuvre. Une œuvre non attestée n'entre pas dans la fiche, même si elle est célèbre et de la bonne période. Mieux vaut deux images certaines que cinq images plausibles.
+- **Sources ouvertes en priorité** : Wikimedia Commons, open access des musées (Met, Art Institute, Rijksmuseum, Centre Pompidou…), sites institutionnels. Éviter les banques d'images commerciales et les revendeurs de posters.
+- **Vignettes, pas des reproductions** : redimensionner à **800 px de large maximum**, qualité JPEG 82. C'est un carnet documentaire personnel, pas une republication.
+- **Crédit systématique** dans le champ `credit` : d'où vient l'image, et le détenteur des droits quand il est identifiable (« Wikimedia Commons, domaine public », « Centre Pompidou / © Succession H. Matisse »).
+- **Chemins** : `images/<id-de-la-fiche>/01.jpg`, numérotation à deux chiffres dans l'ordre d'affichage. Toujours du `.jpg`.
+
+Commande de redimensionnement (ImageMagick est disponible dans les sessions cloud) :
+
+```bash
+curl -sL "<url>" -o /tmp/src && \
+  convert /tmp/src -resize '800x>' -quality 82 images/<id>/01.jpg
+```
+
+Vérifier après coup que chaque fichier référencé dans `artworks` existe bien et pèse plus de quelques kilo-octets — une page d'erreur enregistrée en `.jpg` passerait sinon inaperçue.
 
 ## Tri
 
